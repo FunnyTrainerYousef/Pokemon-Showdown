@@ -7,7 +7,7 @@
  *
  * If you'd like to modify commands, please go to config/commands.js,
  * which also teaches you how to use commands.
- *
+ *p
  * @license MIT license
  */
 
@@ -1609,17 +1609,25 @@ var commands = exports.commands = {
 		});
 	},
 
-	away: 'blockchallenges',
-	idle: 'blockchallenges',
-	blockchallenges: function(target, room, user) {
-		user.blockChallenges = true;
-		this.sendReply('You are now blocking all incoming challenge requests.');
-	},
+	 afk: 'away',
+        away: function(target, room, user, connection) {
+                if (!this.can('lock')) return false;
 
-	back: 'allowchallenges',
-	allowchallenges: function(target, room, user) {
-		user.blockChallenges = false;
-		this.sendReply('You are available for challenges from now on.');
+                if (!user.isAway) {
+                        var originalName = user.name;
+                        var awayName = user.name + ' - Away';
+                        //delete the user object with the new name in case it exists - if it does it can cause issues with forceRename
+                        delete Users.get(awayName);
+                        user.forceRename(awayName, undefined, true);
+
+                        this.add('|raw|-- <b><font color="#4F86F7">' + originalName +'</font color></b> is now away. '+ (target ? " (" + target + ")" : ""));
+
+                        user.isAway = true;
+                }
+                else {
+                        return this.sendReply('You are already set as away, type /back if you are now back');
+                }
+
 	},
 
 	cchall: 'cancelChallenge',
